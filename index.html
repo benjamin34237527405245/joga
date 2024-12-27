@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yoga Self Help</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: black;
+        }
+        h1 {
+            color: #ffffff;
+        }
+        .timer {
+            font-size: 36px;
+            margin: 20px 0;
+            color: #e74c3c;
+        }
+        .instructions {
+            font-size: 20px;
+            margin: 20px 0;
+            color: #3498db;
+        }
+        .button-container {
+            margin: 20px 0;
+        }
+        .button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #8e43e2;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #16a085;
+        }
+        .music-button {
+            font-size: 16px;
+            padding: 5px 10px;
+            margin: 5px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .music-button:hover {
+            background-color: #2980b9;
+        }
+        .reset-button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .reset-button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Yoga Self Help</h1>
+    <div class="instructions" id="instructions">Press Start to begin your yoga session</div>
+    <div class="timer" id="timer">10:00</div>
+    <div class="button-container">
+        <button class="button" id="start-button" onclick="startYoga()">Start</button>
+        <button class="button" id="pause-button" onclick="pauseYoga()">Pause</button>
+    </div>
+    <div class="button-container">
+        <button class="music-button" id="music1-button" onclick="changeMusic('/music1.m4a')">Music 1 (Default)</button>
+        <button class="music-button" id="music2-button" onclick="changeMusic('/music2.m4a')">Music 2 (Default)</button>
+        <button class="music-button" id="music3-button" onclick="handleMusicButtonClick(3)">Music 3 (Custom)</button>
+        <button class="music-button" id="music4-button" onclick="handleMusicButtonClick(4)">Music 4 (Custom)</button>
+        <button class="music-button" onclick="stopMusic()">Stop Music</button>
+    </div>
+    <button class="reset-button" onclick="resetMusicSelection()">Reset Music Selection</button>
+    <input type="file" id="file-input" accept=".mp3,.m4a" style="display: none;" onchange="handleFileSelect(event)">
+    <audio id="background-music" loop>
+        <source id="music-source" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <audio id="phase-music" onended="resumeBackgroundMusic()">
+        <source id="phase-music-source" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <div class="watermark">राहुल कुमार द्वारा बनाया गया</div>
+    <script>
+        let timer;
+        let timeLeft = 600; // 10 minutes
+        let currentPhase = 0;
+        let isPaused = false;
+        let selectedMusicFiles = {};
+
+        const phases = [
+            { name: "Kapalbhati", duration: 600, audio: '/kapalbhati.mp3' },
+            { name: "Anulom Vilom", duration: 300, audio: '/anulomvilom.mp3' },
+            { name: "Rub Hands and Put into Eyes", duration: 30, audio: '/eyewarmth.mp3' },
+            { name: "Session Complete", duration: 0, audio: '/cometomorrow.mp3' }
+        ];
+
+        function requestPermissions() {
+            if (navigator.permissions) {
+                navigator.permissions.query({ name: 'file-system' }).then(function (result) {
+                    if (result.state === 'granted') {
+                        console.log('Permission granted');
+                    } else if (result.state === 'prompt') {
+                        console.log('Permission prompt');
+                    } else {
+                        console.log('Permission denied');
+                    }
+                });
+            } else {
+                console.log('Permissions API not supported');
+            }
+        }
+
+        function startYoga() {
+            if (timer) {
+                clearInterval(timer);
+            }
+            changeMusic('/music1.m4a');
+            currentPhase = 0;
+            isPaused = false;
+            startPhase();
+            document.getElementById('start-button').innerText = "Restart";
+            document.getElementById('pause-button').innerText = "Pause";
+        }
+
+        function startPhase() {
+            if (currentPhase < phases.length) {
+                const phase = phases[currentPhase];
+                document.getElementById('instructions').innerText = `Do ${phase.name}`;
+                timeLeft = phase.duration;
+                playPhaseAudio(phase.audio);
+                updateTimer();
+                timer = setInterval(updateTimer, 1000);
+            } else {
+                document.getElementById('instructions').innerText = "Yoga session completed!";
+                document.getElementById('background-music').pause();
+            }
+        }
+
+        function updateTimer() {
+            if (!isPaused) {
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    currentPhase++;
+                    startPhase();
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    document.getElementById('timer').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                    timeLeft--;
+                }
+            }
+        }
+
+        function pauseYoga() {
+            isPaused = !isPaused;
+            const music = document.getElementById('background-music');
+            const phaseMusic = document.getElementById('phase-music');
+            if (isPaused) {
+                document.getElementById('instructions').innerText += " (Paused)";
+                document.getElementById('pause-button').innerText = "Resume";
+                music.pause();
+                phaseMusic.pause();
+            } else {
+                document.getElementById('instructions').innerText = `Do ${phases[currentPhase].name}`;
+                document.getElementById('pause-button').innerText = "Pause";
+                music.play();
+                phaseMusic.play();
+            }
+        }
+
+        function changeMusic(musicFile) {
+            const music = document.getElementById('background-music');
+            const musicSource = document.getElementById('music-source');
+            music.pause();
+            if (musicFile) {
+                musicSource.src = musicFile;
+                music.load();
+                music.play();
+            }
+        }
+
+        function handleMusicButtonClick(musicNumber) {
+            if (selectedMusicFiles[musicNumber]) {
+                changeMusic(selectedMusicFiles[musicNumber]);
+            } else {
+                selectMusicFile(musicNumber);
+            }
+        }
+
+        function selectMusicFile(musicNumber) {
+            const fileInput = document.getElementById('file-input');
+            fileInput.onchange = (event) => handleFileSelect(event, musicNumber);
+            fileInput.click();
+        }
+
+        function handleFileSelect(event, musicNumber) {
+            const file = event.target.files[0];
+            if (file) {
+                const filePath = URL.createObjectURL(file);
+                selectedMusicFiles[musicNumber] = filePath;
+                localStorage.setItem(`music${musicNumber}`, filePath);
+                document.getElementById(`music${musicNumber}-button`).innerText = file.name.substring(0, 5);
+                changeMusic(filePath);
+            }
+        }
+
+        function stopMusic() {
+            const music = document.getElementById('background-music');
+            music.pause();
+            music.currentTime = 0;
+        }
+
+        function resetMusicSelection() {
+            for (let i = 3; i <= 4; i++) {
+                localStorage.removeItem(`music${i}`);
+                selectedMusicFiles[i] = null;
+                document.getElementById(`music${i}-button`).innerText = `Music ${i} (Custom)`;
+            }
+        }
+
+        function playPhaseAudio(audioFile) {
+            const phaseMusic = document.getElementById('phase-music');
+            const phaseMusicSource = document.getElementById('phase-music-source');
+            const backgroundMusic = document.getElementById('background-music');
+            backgroundMusic.pause();
+            phaseMusicSource.src = audioFile;
+            phaseMusic.load();
+            phaseMusic.play();
+        }
+
+        function resumeBackgroundMusic() {
+            const backgroundMusic = document.getElementById('background-music');
+            backgroundMusic.play();
+        }
+
+        window.onload = () => {
+            requestPermissions();
+            const music1Path = '/music1.m4a';
+            const music2Path = '/music2.m4a';
+            if (music1Path) {
+                document.getElementById('music1-button').innerText = 'Music 1 (Default)';
+            }
+            if (music2Path) {
+                document.getElementById('music2-button').innerText = 'Music 2 (Default)';
+            }
+            for (let i = 3; i <= 4; i++) {
+                const storedFilePath = localStorage.getItem(`music${i}`);
+                if (storedFilePath) {
+                    selectedMusicFiles[i] = storedFilePath;
+                    document.getElementById(`music${i}-button`).innerText = storedFilePath.split('/').pop().substring(0, 5);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
