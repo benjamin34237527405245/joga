@@ -20,6 +20,10 @@
             margin: 20px 0;
             color: #e74c3c;
         }
+         .watermark {
+            color: pink;
+            font-size: 14px;
+         }
         .instructions {
             font-size: 20px;
             margin: 20px 0;
@@ -81,13 +85,13 @@
         <button class="button" id="pause-button" onclick="pauseYoga()">Pause</button>
     </div>
     <div class="button-container">
-        <button class="music-button" id="music1-button" onclick="changeMusic('music1.m4a')">Music 1 (Default)</button>
-        <button class="music-button" id="music2-button" onclick="changeMusic('music2.m4a')">Music 2 (Default)</button>
-        <button class="music-button" id="music3-button" onclick="handleMusicButtonClick(3)">Music 3 (Custom)</button>
-        <button class="music-button" id="music4-button" onclick="handleMusicButtonClick(4)">Music 4 (Custom)</button>
+        <button class="music-button" id="music1-button" onclick="changeMusic('music1.m4a')">Flute</button>
+        <button class="music-button" id="music2-button" onclick="changeMusic('music2.m4a')">Vibrations</button>
+        <button class="music-button" id="music3-button" onclick="handleMusicButtonClick(3)">Choose Music 3 (Custom)</button>
+        <button class="music-button" id="music4-button" onclick="handleMusicButtonClick(4)">Choose Music 4 (Custom)</button>
         <button class="music-button" onclick="stopMusic()">Stop Music</button>
     </div>
-    <button class="reset-button" onclick="resetMusicSelection()">Reset Music Selection</button>
+    <button class="reset-button" onclick="resetMusicSelection()">Reset Custom Music Selection</button>
     <input type="file" id="file-input" accept=".mp3,.m4a" style="display: none;" onchange="handleFileSelect(event)">
     <audio id="background-music" loop>
         <source id="music-source" type="audio/mpeg">
@@ -272,3 +276,5 @@
     </script>
 </body>
 </html>
+   
+
