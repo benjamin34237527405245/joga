@@ -7,10 +7,15 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000;
+        }
+        .container {
             text-align: center;
-            margin: 20px;
-            vertical-align: middle;
-            background-color: black;
         }
         h1 {
             color: #ffffff;
@@ -20,10 +25,6 @@
             margin: 20px 0;
             color: #e74c3c;
         }
-         .watermark {
-            color: pink;
-            font-size: 14px;
-         }
         .instructions {
             font-size: 20px;
             margin: 20px 0;
@@ -55,10 +56,13 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, border 0.3s;
         }
         .music-button:hover {
             background-color: #2980b9;
+        }
+        .music-button.selected {
+            border: 2px solid #ffffff;
         }
         .reset-button {
             font-size: 18px;
@@ -74,40 +78,47 @@
         .reset-button:hover {
             background-color: #c0392b;
         }
+        .watermark {
+            color: pink;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
-    <h1>Yoga Self Help</h1>
-    <div class="instructions" id="instructions">Press Start to begin your yoga session</div>
-    <div class="timer" id="timer">10:00</div>
-    <div class="button-container">
-        <button class="button" id="start-button" onclick="startYoga()">Start</button>
-        <button class="button" id="pause-button" onclick="pauseYoga()">Pause</button>
+    <div class="container">
+        <h1>Yoga Self Help</h1>
+        <div class="instructions" id="instructions">Press Start to begin your yoga session</div>
+        <div class="timer" id="timer">10:00</div>
+        <div class="button-container">
+            <button class="button" id="start-button" onclick="startYoga()">Start</button>
+            <button class="button" id="pause-button" onclick="pauseYoga()">Pause</button>
+        </div>
+        <div class="button-container">
+            <button class="music-button" id="music1-button" onclick="changeMusic('music1.m4a', this)">Flute</button>
+            <button class="music-button" id="music2-button" onclick="changeMusic('music2.m4a', this)">Vibrations</button>
+            <button class="music-button" id="music3-button" onclick="handleMusicButtonClick(3)">Choose Music 3 (Custom)</button>
+            <button class="music-button" id="music4-button" onclick="handleMusicButtonClick(4)">Choose Music 4 (Custom)</button>
+            <button class="music-button" id="stop-music-button" onclick="stopMusic()">Stop Music</button>
+        </div>
+        <button class="reset-button" onclick="resetMusicSelection()">Reset Custom Music Selection</button>
+        <input type="file" id="file-input" accept=".mp3,.m4a" style="display: none;" onchange="handleFileSelect(event)">
+        <audio id="background-music" loop>
+            <source id="music-source" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <audio id="phase-music" onended="resumeBackgroundMusic()">
+            <source id="phase-music-source" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <div class="watermark">राहुल कुमार द्वारा बनाया गया</div>
     </div>
-    <div class="button-container">
-        <button class="music-button" id="music1-button" onclick="changeMusic('music1.m4a')">Flute</button>
-        <button class="music-button" id="music2-button" onclick="changeMusic('music2.m4a')">Vibrations</button>
-        <button class="music-button" id="music3-button" onclick="handleMusicButtonClick(3)">Choose Music 3 (Custom)</button>
-        <button class="music-button" id="music4-button" onclick="handleMusicButtonClick(4)">Choose Music 4 (Custom)</button>
-        <button class="music-button" onclick="stopMusic()">Stop Music</button>
-    </div>
-    <button class="reset-button" onclick="resetMusicSelection()">Reset Custom Music Selection</button>
-    <input type="file" id="file-input" accept=".mp3,.m4a" style="display: none;" onchange="handleFileSelect(event)">
-    <audio id="background-music" loop>
-        <source id="music-source" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-    <audio id="phase-music" onended="resumeBackgroundMusic()">
-        <source id="phase-music-source" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-    <div class="watermark">राहुल कुमार द्वारा बनाया गया</div>
     <script>
         let timer;
         let timeLeft = 600; // 10 minutes
         let currentPhase = 0;
         let isPaused = false;
         let selectedMusicFiles = {};
+        let currentMusicButton = null;
 
         const phases = [
             { name: "Kapalbhati", duration: 600, audio: 'kapalbhati.mp3' },
@@ -136,7 +147,7 @@
             if (timer) {
                 clearInterval(timer);
             }
-            changeMusic('music2.m4a');
+            changeMusic('music2.m4a', document.getElementById('music2-button'));
             currentPhase = 0;
             isPaused = false;
             startPhase();
@@ -190,7 +201,7 @@
             }
         }
 
-        function changeMusic(musicFile) {
+        function changeMusic(musicFile, button) {
             const music = document.getElementById('background-music');
             const musicSource = document.getElementById('music-source');
             music.pause();
@@ -198,12 +209,21 @@
                 musicSource.src = musicFile;
                 music.load();
                 music.play();
+                updateSelectedButton(button);
             }
+        }
+
+        function updateSelectedButton(button) {
+            if (currentMusicButton) {
+                currentMusicButton.classList.remove('selected');
+            }
+            button.classList.add('selected');
+            currentMusicButton = button;
         }
 
         function handleMusicButtonClick(musicNumber) {
             if (selectedMusicFiles[musicNumber]) {
-                changeMusic(selectedMusicFiles[musicNumber]);
+                changeMusic(selectedMusicFiles[musicNumber], document.getElementById(`music${musicNumber}-button`));
             } else {
                 selectMusicFile(musicNumber);
             }
@@ -222,7 +242,7 @@
                 selectedMusicFiles[musicNumber] = filePath;
                 localStorage.setItem(`music${musicNumber}`, filePath);
                 document.getElementById(`music${musicNumber}-button`).innerText = file.name.substring(0, 5);
-                changeMusic(filePath);
+                changeMusic(filePath, document.getElementById(`music${musicNumber}-button`));
             }
         }
 
@@ -230,13 +250,14 @@
             const music = document.getElementById('background-music');
             music.pause();
             music.currentTime = 0;
+            updateSelectedButton(document.getElementById('stop-music-button'));
         }
 
         function resetMusicSelection() {
             for (let i = 3; i <= 4; i++) {
                 localStorage.removeItem(`music${i}`);
                 selectedMusicFiles[i] = null;
-                document.getElementById(`music${i}-button`).innerText = `Music ${i} (Custom)`;
+                document.getElementById(`music${i}-button`).innerText = `Choose Music ${i} (Custom)`;
             }
         }
 
@@ -260,21 +281,21 @@
             const music1Path = 'music1.m4a';
             const music2Path = 'music2.m4a';
             if (music1Path) {
-                document.getElementById('music1-button').innerText = 'Music 1 (Default)';
+                document.getElementById('music1-button').innerText = 'Flutes';
             }
             if (music2Path) {
-                document.getElementById('music2-button').innerText = 'Music 2 (Default)';
+                document.getElementById('music2-button').innerText = 'Vibrations';
             }
             for (let i = 3; i <= 4; i++) {
                 const storedFilePath = localStorage.getItem(`music${i}`);
                 if (storedFilePath) {
                     selectedMusicFiles[i] = storedFilePath;
                     document.getElementById(`music${i}-button`).innerText = storedFilePath.split('/').pop().substring(0, 5);
+                } else {
+                    document.getElementById(`music${i}-button`).innerText = `Choose Music ${i} (Custom)`;
                 }
             }
         };
     </script>
 </body>
 </html>
-   
-
