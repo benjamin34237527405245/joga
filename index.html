@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yoga Self Help</title>
+    <link rel="manifest" href="manifest.json">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -113,6 +114,16 @@
         <div class="watermark">राहुल कुमार द्वारा बनाया गया</div>
     </div>
     <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+
         let timer;
         let timeLeft = 600; // 10 minutes
         let currentPhase = 0;
@@ -126,22 +137,6 @@
             { name: "Rub Hands and Put into Eyes", duration: 30, audio: 'eyewarmth.mp3' },
             { name: "Session Complete", duration: 0, audio: 'cometomorrow.mp3' }
         ];
-
-        function requestPermissions() {
-            if (navigator.permissions) {
-                navigator.permissions.query({ name: 'file-system' }).then(function (result) {
-                    if (result.state === 'granted') {
-                        console.log('Permission granted');
-                    } else if (result.state === 'prompt') {
-                        console.log('Permission prompt');
-                    } else {
-                        console.log('Permission denied');
-                    }
-                });
-            } else {
-                console.log('Permissions API not supported');
-            }
-        }
 
         function startYoga() {
             if (timer) {
@@ -277,7 +272,6 @@
         }
 
         window.onload = () => {
-            requestPermissions();
             const music1Path = 'music1.m4a';
             const music2Path = 'music2.m4a';
             if (music1Path) {
