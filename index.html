@@ -22,7 +22,7 @@
             color: #ffffff;
         }
         .timer {
-            font-size: 36px;
+            font-size: 100px;
             margin: 20px 0;
             color: #e74c3c;
         }
@@ -34,7 +34,7 @@
         .button-container {
             margin: 20px 0;
         }
-        .button {
+        .button, .add-to-home-button {
             font-size: 18px;
             padding: 10px 20px;
             margin: 5px;
@@ -45,7 +45,7 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        .button:hover {
+        .button:hover, .add-to-home-button:hover {
             background-color: #16a085;
         }
         .music-button {
@@ -79,6 +79,15 @@
         .reset-button:hover {
             background-color: #c0392b;
         }
+        .add-to-home-button {
+            background-color: #4285f4;
+            color: #fff;
+            display: block;
+            margin: 20px auto;
+        }
+        .add-to-home-button:hover {
+            background-color: #357ae8;
+        }
         .watermark {
             color: pink;
             font-size: 14px;
@@ -102,6 +111,7 @@
             <button class="music-button" id="stop-music-button" onclick="stopMusic()">Stop Music</button>
         </div>
         <button class="reset-button" onclick="resetMusicSelection()">Reset Custom Music Selection</button>
+        <button class="add-to-home-button" id="add-to-home-button" style="display: none;">Add to Home Screen</button>
         <input type="file" id="file-input" accept=".mp3,.m4a" style="display: none;" onchange="handleFileSelect(event)">
         <audio id="background-music" loop>
             <source id="music-source" type="audio/mpeg">
@@ -123,6 +133,29 @@
                 });
             });
         }
+
+        let deferredPrompt;
+        const addToHomeButton = document.getElementById('add-to-home-button');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('beforeinstallprompt event fired');
+            e.preventDefault();
+            deferredPrompt = e;
+            addToHomeButton.style.display = 'block';
+        });
+
+        addToHomeButton.addEventListener('click', () => {
+            addToHomeButton.style.display = 'none';
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the A2HS prompt');
+                } else {
+                    console.log('User dismissed the A2HS prompt');
+                }
+                deferredPrompt = null;
+            });
+        });
 
         let timer;
         let timeLeft = 600; // 10 minutes
