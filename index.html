@@ -144,7 +144,7 @@
     <div class="container">
         <h1>Yoga Self Help</h1>
         <div class="instructions" id="instructions">Press Start to begin your yoga session</div>
-        <div class="timer" id="timer">10:00</div>
+        <div class="timer" id="timer">5:00</div>
         <div class="button-container">
             <button class="button" id="start-button" onclick="startYoga()">Start</button>
             <button class="button" id="pause-button" onclick="pauseYoga()">Pause</button>
@@ -219,15 +219,15 @@
         });
 
         let timer;
-        let timeLeft = 600; // 10 minutes
+        let timeLeft = 300; // 10 minutes
         let currentPhase = 0;
         let isPaused = false;
         let selectedMusicFiles = {};
         let currentMusicButton = null;
 
         const phases = [
-            { name: "Kapalbhati", duration: 600, audio: 'kapalbhati.mp3' },
-            { name: "Anulom Vilom", duration: 300, audio: 'anulomvilom.mp3' },
+            { name: "Kapalbhati", duration: 300, audio: 'kapalbhati.mp3' },
+            { name: "Anulom Vilom", duration: 180, audio: 'anulomvilom.mp3' },
             { name: "Rub Hands and Put into Eyes", duration: 15, audio: 'eyewarmth.mp3' },
             { name: "Session Complete", duration: 0, audio: 'cometomorrow.mp3' }
         ];
