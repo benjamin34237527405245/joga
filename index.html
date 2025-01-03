@@ -13,7 +13,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #000;
+            background-color: #000000;
         }
         .container {
             text-align: center;
@@ -38,29 +38,32 @@
             font-size: 18px;
             padding: 10px 20px;
             margin: 5px;
-            background-color: #8e43e2;
-            color: #fff;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b); /* Modern gradient */
+            color: #000000;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background 0.3s, transform 0.3s;
         }
         .button:hover, .add-to-home-button:hover {
-            background-color: #16a085;
+            background: linear-gradient(90deg, #ff0000, #fe8c7b); /* Darker gradient on hover */
+            transform: scale(1.05);
         }
         .music-button {
+            font-family: Canva sans;
             font-size: 16px;
             padding: 5px 10px;
             margin: 5px;
-            background-color: #3498db;
-            color: #fff;
+            background: linear-gradient(90deg, #98e02d, #fb9403); /* Modern gradient */
+            color: #000000;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s, border 0.3s;
+            transition: background 0.3s, transform 0.3s;
         }
         .music-button:hover {
-            background-color: #2980b9;
+            background: linear-gradient(90deg, #5500f2, #5b86e5); /* Darker gradient on hover */
+            transform: scale(1.05);
         }
         .music-button.selected {
             border: 2px solid #ffffff;
@@ -69,28 +72,71 @@
             font-size: 18px;
             padding: 10px 20px;
             margin-top: 20px;
-            background-color: #e74c3c;
-            color: #fff;
+            background: linear-gradient(90deg, #43cea2, #185a9d); /* Modern gradient */
+            color: #000000;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background 0.3s, transform 0.3s;
         }
         .reset-button:hover {
-            background-color: #c0392b;
+            background: linear-gradient(90deg, #dc1277, #185a9d); /* Darker gradient on hover */
+            transform: scale(1.05);
         }
         .add-to-home-button {
-            background-color: #4285f4;
-            color: #fff;
+            background: linear-gradient(90deg, #36d1dc, #5b86e5); /* Modern gradient */
+            color: #000000;
             display: block;
             margin: 20px auto;
+            transition: background 0.3s, transform 0.3s;
         }
         .add-to-home-button:hover {
-            background-color: #357ae8;
+            background: linear-gradient(90deg, #2ec1dc, #5b86e5); /* Darker gradient on hover */
+            transform: scale(1.05);
         }
         .watermark {
             color: pink;
-            font-size: 14px;
+            font-size: 20px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+            font-family: Canva sans;
+        }
+        .modal-content {
+            background: linear-gradient(90deg, #a97ee4, #8e43e2); /* Modern gradient */
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+        .close {
+            color: #000000;
+            float: right;
+            font-size: 35px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -98,7 +144,7 @@
     <div class="container">
         <h1>Yoga Self Help</h1>
         <div class="instructions" id="instructions">Press Start to begin your yoga session</div>
-        <div class="timer" id="timer">5:00</div> <!-- Updated initial timer value -->
+        <div class="timer" id="timer">10:00</div>
         <div class="button-container">
             <button class="button" id="start-button" onclick="startYoga()">Start</button>
             <button class="button" id="pause-button" onclick="pauseYoga()">Pause</button>
@@ -111,6 +157,7 @@
             <button class="music-button" id="stop-music-button" onclick="stopMusic()">Stop Music</button>
         </div>
         <button class="reset-button" onclick="resetMusicSelection()">Reset Custom Music Selection</button>
+        <button class="button" onclick="openModal()">Customize</button>
         <button class="add-to-home-button" id="add-to-home-button" style="display: none;">Add to Home Screen</button>
         <input type="file" id="file-input" accept=".mp3,.m4a" style="display: none;" onchange="handleFileSelect(event)">
         <audio id="background-music" loop>
@@ -123,6 +170,20 @@
         </audio>
         <div class="watermark">राहुल कुमार द्वारा बनाया गया</div>
     </div>
+
+    <!-- The Modal -->
+    <div id="customizeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Adjust Timings</h2>
+            <label for="kapalbhatiTime">Kapalbhati (minutes):</label>
+            <input type="number" id="kapalbhatiTime" min="1" value="10">
+            <label for="anulomVilomTime">Anulom Vilom (minutes):</label>
+            <input type="number" id="anulomVilomTime" min="1" value="5">
+            <button class="button" onclick="saveTimings()">Save</button>
+        </div>
+    </div>
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -158,15 +219,15 @@
         });
 
         let timer;
-        let timeLeft = 300; // 5 minutes for Kapalbhati
+        let timeLeft = 600; // 10 minutes
         let currentPhase = 0;
         let isPaused = false;
         let selectedMusicFiles = {};
         let currentMusicButton = null;
 
         const phases = [
-            { name: "Kapalbhati", duration: 300, audio: 'kapalbhati.mp3' }, // 5 minutes
-            { name: "Anulom Vilom", duration: 180, audio: 'anulomvilom.mp3' }, // 3 minutes
+            { name: "Kapalbhati", duration: 600, audio: 'kapalbhati.mp3' },
+            { name: "Anulom Vilom", duration: 300, audio: 'anulomvilom.mp3' },
             { name: "Rub Hands and Put into Eyes", duration: 30, audio: 'eyewarmth.mp3' },
             { name: "Session Complete", duration: 0, audio: 'cometomorrow.mp3' }
         ];
@@ -304,7 +365,50 @@
             backgroundMusic.play();
         }
 
+        function openModal() {
+            document.getElementById('customizeModal').style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById('customizeModal').style.display = "none";
+        }
+
+        function saveTimings() {
+            const kapalbhatiTime = parseInt(document.getElementById('kapalbhatiTime').value) * 60;
+            const anulomVilomTime = parseInt(document.getElementById('anulomVilomTime').value) * 60;
+            phases[0].duration = kapalbhatiTime;
+            phases[1].duration = anulomVilomTime;
+            localStorage.setItem('kapalbhatiTime', kapalbhatiTime);
+            localStorage.setItem('anulomVilomTime', anulomVilomTime);
+            document.getElementById('timer').innerText = `${Math.floor(kapalbhatiTime / 60)}:00`;
+            closeModal();
+        }
+
+        function loadTimings() {
+            const kapalbhatiTime = localStorage.getItem('kapalbhatiTime');
+            const anulomVilomTime = localStorage.getItem('anulomVilomTime');
+            if (kapalbhatiTime) {
+                phases[0].duration = parseInt(kapalbhatiTime);
+                document.getElementById('kapalbhatiTime').value = kapalbhatiTime / 60;
+                document.getElementById('timer').innerText = `${Math.floor(kapalbhatiTime / 60)}:00`;
+            }
+            if (anulomVilomTime) {
+                phases[1].duration = parseInt(anulomVilomTime);
+                document.getElementById('anulomVilomTime').value = anulomVilomTime / 60;
+            }
+        }
+
+        function enableWakeLock() {
+            let wakeLock = null;
+            try {
+                wakeLock = navigator.wakeLock.request('screen');
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        }
+
         window.onload = () => {
+            loadTimings();
             const music1Path = 'music1.m4a';
             const music2Path = 'music2.m4a';
             if (music1Path) {
@@ -323,6 +427,24 @@
                 }
             }
         };
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                enableWakeLock();
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                enableWakeLock();
+            }
+        });
+
+        document.getElementById('start-button').addEventListener('click', () => {
+            document.documentElement.requestFullscreen().catch((err) => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+        });
     </script>
 </body>
 </html>
